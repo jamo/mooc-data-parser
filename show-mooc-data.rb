@@ -68,16 +68,30 @@ class ShowMoocData
     username = $stdin.gets.strip
     print 'password: '
     password = $stdin.noecho(&:gets).strip
+    puts
     {username: username, password: password}
   end
 
   def maybe_fetch_json(auth)
     if @options.reload or @notes['user_info'].nil? or @notes['week_data'].nil?
+
+      t = -> do
+        loop do
+          print '.'
+          sleep 0.5
+        end
+        puts
+      end
+
+
+      th = Thread.new(&t)
+
       url = "http://tmc.mooc.fi/mooc/participants.json?api_version=7&utf8=%E2%9C%93&filter_koko_nimi=&column_username=1&column_email=1&column_koko_nimi=1&column_hakee_yliopistoon_2014=1&group_completion_course_id=18"
       user_info = JSON.parse(HTTParty.get(url, basic_auth: auth).body)['participants']
       week_data = fetch_week_datas(auth)
       @notes['user_info'] = user_info.clone
       @notes['week_data'] = week_data.clone
+      th.kill
       {participants: user_info, week_data: week_data}
     else
       {participants: @notes['user_info'].clone, week_data: @notes['week_data'].clone}
