@@ -49,6 +49,10 @@ class ShowMoocData
     elsif @options.list
       list_and_filter_participants(json)
     else
+      DATA.reopen(__FILE__, "r+")
+      DATA.truncate(pos)
+      DATA.seek(pos)
+      DATA.puts @notes.to_json
       puts opt
       abort
     end
@@ -160,7 +164,7 @@ class ShowMoocData
   def get_points_info_for_user(participant, week_data)
     # TODO: täydennä data viikoille 11 ja 12
     compulsory_exercises = {'6' => %w(102.1 102.2 102.3 103.1 103.2 103.3), '7' => %w(116.1 116.2 116.3), '8' => %w(124.1 124.2 124.3 124.4),
-                            '9' => %w(134.1 134.2 134.3 134.4 134.5), '10' => %w(141.1 141.2 141.3 141.4), '11' => %w(), '12' => %w()}
+                            '9' => %w(134.1 134.2 134.3 134.4 134.5), '10' => %w(141.1 141.2 141.3 141.4), '11' => %w(151.1 151.2 151.3 151.4), '12' => %w()}
     points_by_week = {}
     week_data.keys.each do |week|
       points_by_week[week] = week_data[week][participant['username']]
