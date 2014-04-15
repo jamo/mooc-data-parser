@@ -116,15 +116,35 @@ class ShowMoocData
     formatted_print_user_details ["Email", my_user['email']]
     formatted_print_user_details ["Hakee yliopistoon", my_user['hakee_yliopistoon_2014']]
     formatted_print_user_details ["Koko nimi", my_user['koko_nimi']]
-    missing_points = get_points_info_for_user(my_user, week_data)
 
-    missing_points.each do |k,v|
-      formatted_print_user_details [k, v.join(", ")]
+    if @options.show_completion_percentige
+      formatted_print_user_details ["Points per week"]
+      done_exercise_percents(my_user, participants).each do |k|
+        begin
+          k = k.first
+          formatted_print_user_details [k[0], k[1]]
+        rescue
+          nil
+        end
+      end
     end
+
+    if @options.show_missing_compulsory_points
+      formatted_print_user_details ["Compulsory points"]
+      get_points_info_for_user(my_user, week_data).each do |k,v|
+        formatted_print_user_details [k, v.join(", ")]
+      end
+    end
+
   end
 
   def formatted_print_user_details(details)
-    puts "%18s: %-20s" % details
+    case details.size
+    when 1
+      puts "%18s" % details
+    when 2
+      puts "%18s: %-20s" % details
+    end
   end
 
   def fetch_week_datas(auth)
