@@ -1,6 +1,7 @@
 
 module MoocDataParser
   require 'fileutils'
+  require 'tmpdir'
   class DummyCacher
     def initialize
       FileUtils.mkdir_p(path)
@@ -50,7 +51,7 @@ module MoocDataParser
     end
 
     def path
-      File.join(Dir.tmpdir, "mooc-data-analyser")
+      File.join(tmpdir_path, "mooc-data-analyser")
     end
 
     def clean!

@@ -5,7 +5,7 @@ require 'mooc_data_parser/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "mooc-data-parser"
-  spec.version       = Mooc::Data::Parser::VERSION
+  spec.version       = MoocDataParser::VERSION
   spec.authors       = ["Jarmo Isotalo"]
   spec.email         = ["jamo@isotalo.fi"]
   spec.summary       = %q{A small command line utility to show data from our tmc-server.}
