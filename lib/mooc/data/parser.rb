@@ -1,5 +1,6 @@
-require "mooc/data/parser/version"
 require "mooc/data/parser/app"
+require "mooc/data/parser/dummy_cacher"
+require "mooc/data/parser/version"
 module Mooc
   module Data
     require 'optparse'

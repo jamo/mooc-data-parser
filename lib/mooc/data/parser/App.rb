@@ -9,8 +9,8 @@ module Mooc
     module Parser
       class App
         def run(args)
-          @cache = DummyCacher.new
-          @notes = begin JSON.parse(@cache.read_file_from_cache('data.json')) rescue  {} end
+          $cache ||= Mooc::Data::Parser::DummyCacher.new
+          @notes = begin JSON.parse($cache.read_file_from_cache('data.json')) rescue  {} end
 
           @options = OpenStruct.new
           opt = OptionParser.new do |opts|
@@ -44,7 +44,7 @@ module Mooc
           end
           opt.parse!(args)
 
-          json = maybe_fetch_json(get_auth())
+          json = maybe_fetch_json()
           if @options.user
             show_info_about(@options.user, 'username', json)
           elsif @options.user_email
@@ -54,15 +54,11 @@ module Mooc
           elsif @options.list
             list_and_filter_participants(json)
           else
-            @cache.write_file_to_cache('data.json', @notes.to_json)
+            $cache.write_file_to_cache('data.json', @notes.to_json)
             puts opt
             abort
           end
-
-          DATA.reopen(__FILE__, "r+")
-          DATA.truncate(pos)
-          DATA.seek(pos)
-          DATA.puts @notes.to_json
+          $cache.write_file_to_cache('data.json', @notes.to_json)
         end
 
         def get_auth
@@ -74,7 +70,7 @@ module Mooc
           {username: username, password: password}
         end
 
-        def maybe_fetch_json(auth)
+        def maybe_fetch_json()
           if @options.reload or @notes['user_info'].nil? or @notes['week_data'].nil?
 
             t = -> do
@@ -85,7 +81,7 @@ module Mooc
               puts
             end
 
-
+            auth = get_auth()
             th = Thread.new(&t)
 
             url = "http://tmc.mooc.fi/mooc/participants.json?api_version=7&utf8=%E2%9C%93&filter_koko_nimi=&column_username=1&column_email=1&column_koko_nimi=1&column_hakee_yliopistoon_2014=1&group_completion_course_id=18"

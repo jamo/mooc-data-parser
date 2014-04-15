@@ -18,6 +18,12 @@ module Mooc
           end
         end
 
+        def read_file_from_cache(filename)
+          Dir.chdir(path) do
+            File.read(filename)
+          end
+        end
+
         def get_from_cache(file_name)
           File.join(path,  file_name)
         end
