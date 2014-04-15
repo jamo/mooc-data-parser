@@ -92,6 +92,7 @@ class ShowMoocData
       @notes['user_info'] = user_info.clone
       @notes['week_data'] = week_data.clone
       th.kill
+      puts
       {participants: user_info, week_data: week_data}
     else
       {participants: @notes['user_info'].clone, week_data: @notes['week_data'].clone}
@@ -147,8 +148,9 @@ class ShowMoocData
       nice_string_in_array = wanted_fields.map do |key|
         participant[key]
       end
+      nice_string_in_array << format_done_exercises_percents(done_exercise_percents(participant, participants))
       nice_string_in_array << missing_points_to_list_string(get_points_info_for_user(participant, week_data))
-      puts "%-20s %-35s %-25s %-120s" % nice_string_in_array
+      puts "%-20s %-35s %-25s %-180s %-120s" % nice_string_in_array
     end
 
     puts
@@ -157,6 +159,32 @@ class ShowMoocData
     puts "%25s: %4d" % ["Kaikenkaikkiaan kurssilla", everyone_in_course]
     puts "%25s: %4d" % ["Hakee yliopistoon", hakee_yliopistoon]
 
+  end
+
+
+  def format_done_exercises_percents(hash)
+    hash.map do |k|
+      begin
+        k = k.first
+      "#{k[0].scan(/\d+/).first}: #{k[1]}"
+      rescue
+        nil
+      end
+    end.compact.join(", ")
+  end
+
+
+  def done_exercise_percents(participant, participants_data)
+    user_info = participants_data.find{ |p| p['username'] == participant['username'] }
+    exercise_weeks = user_info['groups']
+    week_keys = (1..12).map{|i| "viikko#{i}"}
+
+    week_keys.map do |week|
+      details = exercise_weeks[week]
+      unless details.nil?
+        {week => ("%3.1f%" % [(details['points'].to_f / details['total'].to_f) * 100])}
+      end
+    end
   end
 
   def missing_points_to_list_string(missing_by_week)
@@ -176,7 +204,7 @@ class ShowMoocData
   end
 
   def get_points_info_for_user(participant, week_data)
-    # TODO: täydennä data viikoille 11 ja 12
+    # TODO: täydennä data viikolle 12
     compulsory_exercises = {'6' => %w(102.1 102.2 102.3 103.1 103.2 103.3), '7' => %w(116.1 116.2 116.3), '8' => %w(124.1 124.2 124.3 124.4),
                             '9' => %w(134.1 134.2 134.3 134.4 134.5), '10' => %w(141.1 141.2 141.3 141.4), '11' => %w(151.1 151.2 151.3 151.4), '12' => %w()}
     points_by_week = {}
