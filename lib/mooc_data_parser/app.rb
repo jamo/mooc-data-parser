@@ -5,6 +5,7 @@ module MoocDataParser
   require 'json'
   require 'io/console'
   class App
+
     def run(args)
       init_variables()
       parse_options(args)
