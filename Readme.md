@@ -1,5 +1,7 @@
 # Mooc Data Parser
 
+[![CodeClimate](https://codeclimate.com/github/jamox/mooc-data-parser.png)](https://codeclimate.com/github/jamox/mooc-data-parser)
+
 ## Installation
 
 Or install it yourself as:
