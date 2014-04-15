@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby -w
 module MoocDataParser
   require 'optparse'
   require 'ostruct'
@@ -7,9 +6,34 @@ module MoocDataParser
   require 'io/console'
   class App
     def run(args)
+      init_variables()
+      parse_options()
+      decide_what_to_do(maybe_fetch_json())
+      $cache.write_file_to_cache('data.json', @notes.to_json)
+    end
+
+    def decide_what_to_do
+      if @options.user
+        show_info_about(@options.user, 'username', json)
+      elsif @options.user_email
+        show_info_about(@options.user_email, 'email', json)
+      elsif @options.user_tmc_username
+        show_info_about(@options.user_tmc_username, 'username', json)
+      elsif @options.list
+        list_and_filter_participants(json)
+      else
+        $cache.write_file_to_cache('data.json', @notes.to_json)
+        puts opt
+        abort
+      end
+    end
+
+    def init_variables
       $cache ||= MoocDataParser::DummyCacher.new
       @notes = begin JSON.parse($cache.read_file_from_cache('data.json')) rescue  {} end
+    end
 
+    def parse_options
       @options = OpenStruct.new
       opt = OptionParser.new do |opts|
         opts.banner = "Usage: show-mooc-details.rb [options]"
@@ -41,22 +65,6 @@ module MoocDataParser
         end
       end
       opt.parse!(args)
-
-      json = maybe_fetch_json()
-      if @options.user
-        show_info_about(@options.user, 'username', json)
-      elsif @options.user_email
-        show_info_about(@options.user_email, 'email', json)
-      elsif @options.user_tmc_username
-        show_info_about(@options.user_tmc_username, 'username', json)
-      elsif @options.list
-        list_and_filter_participants(json)
-      else
-        $cache.write_file_to_cache('data.json', @notes.to_json)
-        puts opt
-        abort
-      end
-      $cache.write_file_to_cache('data.json', @notes.to_json)
     end
 
     def get_auth
