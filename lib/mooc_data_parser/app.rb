@@ -7,7 +7,7 @@ module MoocDataParser
   class App
     def run(args)
       init_variables()
-      parse_options()
+      parse_options(args)
       decide_what_to_do(maybe_fetch_json())
       $cache.write_file_to_cache('data.json', @notes.to_json)
     end
