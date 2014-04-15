@@ -1,7 +1,7 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'mooc/data/parser/version'
+require 'mooc_data_parser/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "mooc-data-parser"
@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Jarmo Isotalo"]
   spec.email         = ["jamo@isotalo.fi"]
   spec.summary       = %q{A small command line utility to show data from our tmc-server.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/jamox/mooc-data-parser"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

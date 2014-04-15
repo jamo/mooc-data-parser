@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
 begin
-  require 'mooc-data-parser'
+  require 'mooc_data_parser'
  rescue LoadError
   require 'rubygems'
-  require 'mooc-data-parser'
+  require 'mooc_data_parser'
 end
 
-Mooc::Data::Parser::App.new.run(ARGV)
+MoocDataParser::App.new.run(ARGV)
 
