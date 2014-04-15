@@ -14,6 +14,13 @@ Usage: show-mooc-details.rb [options]
     -h, --help                       Show this message
 ```
 
+
+Since refreshing data for each search is unnecessary this will cache everything that requires a http request,
+thus making the functionality much faster.
+
+To get fresh data, use `-f` command line parameter.
+
+
 Show basic info for applicants
 ```bash
 ./show-mooc-data.rb -l
