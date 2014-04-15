@@ -10,7 +10,7 @@ Scripts made to process some data for our Massive Open Online Courses.
 ## Usage
 
 ```bash
-Usage: show-mooc-details.rb [options]
+Usage: show-mooc-details [options]
     -f, --force                      Reload data from server
     -u, --user username              Show details for user
     -m, --missing-points             Show missing compulsary points
@@ -30,33 +30,33 @@ To get fresh data, use `-f` command line parameter.
 
 Show basic info for applicants
 ```bash
-./show-mooc-data.rb -l
+mooc-data-parser -l
 ```
 
 Show basic info for applicants and percents for each week
 ```bash
-./show-mooc-data.rb -l -c
+mooc-data-parser -l -c
 ```
 
 Show basic info for applicants and missing points
 ```bash
-./show-mooc-data.rb -l -m
+mooc-data-parser -l -m
 ```
 
 Show basic info for applicants and percents for each week and missing points
 ```bash
-./show-mooc-data.rb -l -c -m
+mooc-data-parser -l -c -m
 ```
 
 Find info about a user
 * by email:
 ```bash
-./show-mooc-data.rb -e <email>
+mooc-data-parser -e <email>
 ```
 
 * by username:
 ```bash
-./show-mooc-data.rb -u <username>
+mooc-data-parser -u <username>
 ```
 
 Flags `-c` and `-l` can be used with these too.
