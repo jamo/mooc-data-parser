@@ -1,6 +1,13 @@
 # Mooc Data Parser
 
+## Installation
+
+Or install it yourself as:
+
+    $ gem install mooc-data-parser
 Scripts made to process some data for our Massive Open Online Courses.
+
+## Usage
 
 ```bash
 Usage: show-mooc-details.rb [options]
@@ -53,3 +60,5 @@ Find info about a user
 ```
 
 Flags `-c` and `-l` can be used with these too.
+
+
