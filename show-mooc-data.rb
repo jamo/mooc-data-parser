@@ -23,6 +23,12 @@ class ShowMoocData
       opts.on("-u", "--user username", "Show details for user") do |v|
         @options.user = v
       end
+      opts.on("-m", "--missing-points", "Show missing compulsary points") do |v|
+        @options.show_missing_compulsory_points = true
+      end
+      opts.on("-c", "--completion-precentige", "Show completition percentige") do |v|
+        @options.show_completion_percentige = true
+      end
       opts.on("-e", "--email emailaddress", "Show details for user") do |v|
         @options.user_email = v
       end
@@ -112,7 +118,6 @@ class ShowMoocData
     formatted_print_user_details ["Koko nimi", my_user['koko_nimi']]
     missing_points = get_points_info_for_user(my_user, week_data)
 
-    formatted_print_user_details ["Missing points", "===================================="]
     missing_points.each do |k,v|
       formatted_print_user_details [k, v.join(", ")]
     end
@@ -148,9 +153,19 @@ class ShowMoocData
       nice_string_in_array = wanted_fields.map do |key|
         participant[key]
       end
-      nice_string_in_array << format_done_exercises_percents(done_exercise_percents(participant, participants))
-      nice_string_in_array << missing_points_to_list_string(get_points_info_for_user(participant, week_data))
-      puts "%-20s %-35s %-25s %-180s %-120s" % nice_string_in_array
+      if @options.show_completion_percentige
+        nice_string_in_array << format_done_exercises_percents(done_exercise_percents(participant, participants))
+      end
+      if @options.show_missing_compulsory_points
+        nice_string_in_array << missing_points_to_list_string(get_points_info_for_user(participant, week_data))
+      end
+
+
+      to_be_printed = "%-20s %-35s %-25s "
+      to_be_printed << "%-180s " if @options.show_completion_percentige
+      to_be_printed << "%-120s" if @options.show_missing_compulsory_points
+
+      puts to_be_printed % nice_string_in_array
     end
 
     puts
