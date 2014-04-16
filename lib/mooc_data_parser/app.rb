@@ -201,18 +201,23 @@ module MoocDataParser
         nice_string_in_array = wanted_fields.map do |key|
           participant[key]
         end
-        if @options.show_completion_percentige
-          nice_string_in_array << format_done_exercises_percents(done_exercise_percents(participant, participants))
-        end
-        if @options.show_missing_compulsory_points
-          nice_string_in_array << missing_points_to_list_string(get_points_info_for_user(participant, week_data))
-        end
 
         to_be_printed = "%-20s %-35s %-25s "
-        to_be_printed << "%-180s " if @options.show_completion_percentige
-        to_be_printed << "%-120s" if @options.show_missing_compulsory_points
+
+        maybe_add_extra_fields(nice_string_in_array, to_be_printed, participants, participant, week_data)
 
         puts to_be_printed % nice_string_in_array
+      end
+    end
+
+    def maybe_add_extra_fields(nice_string_in_array, to_be_printed, participants, participant, week_data)
+      if @options.show_completion_percentige
+        nice_string_in_array << format_done_exercises_percents(done_exercise_percents(participant, participants))
+        to_be_printed << "%-180s "
+      end
+      if @options.show_missing_compulsory_points
+        nice_string_in_array << missing_points_to_list_string(get_points_info_for_user(participant, week_data))
+        to_be_printed << "%-120s"
       end
     end
 
@@ -229,9 +234,15 @@ module MoocDataParser
 
     def done_exercise_percents(participant, participants_data)
       user_info = participants_data.find{ |p| p['username'] == participant['username'] }
-      exercise_weeks = user_info['groups']
-      week_keys = (1..12).map{|i| "viikko#{i}"}
+      map_week_keys(user_info)
+    end
 
+    def week_keys
+      (1..12).map{|i| "viikko#{i}"}
+    end
+
+    def map_week_keys(user_info)
+      exercise_weeks = user_info['groups']
       week_keys.map do |week|
         details = exercise_weeks[week]
         unless details.nil?
@@ -255,12 +266,13 @@ module MoocDataParser
       str
     end
 
-    def get_points_info_for_user(participant, week_data)
+    def compulsory_exercises
       # TODO: täydennä data viikolle 12
-      compulsory_exercises = {'6' => %w(102.1 102.2 102.3 103.1 103.2 103.3), '7' => %w(116.1 116.2 116.3), '8' => %w(124.1 124.2 124.3 124.4),
-                              '9' => %w(134.1 134.2 134.3 134.4 134.5), '10' => %w(141.1 141.2 141.3 141.4), '11' => %w(151.1 151.2 151.3 151.4), '12' => %w()}
-      points_by_week = {}
-      week_data.keys.each do |week|
+      {'6' => %w(102.1 102.2 102.3 103.1 103.2 103.3), '7' => %w(116.1 116.2 116.3), '8' => %w(124.1 124.2 124.3 124.4),
+       '9' => %w(134.1 134.2 134.3 134.4 134.5), '10' => %w(141.1 141.2 141.3 141.4), '11' => %w(151.1 151.2 151.3 151.4), '12' => %w()}
+    end
+    def get_points_info_for_user(participant, week_data)
+      points_by_week = week_data.keys.each_with_object({}) do |week, points_by_week|
         points_by_week[week] = week_data[week][participant['username']]
       end
 
