@@ -1,10 +1,10 @@
 module MoocDataParser
   require 'optparse'
   require 'ostruct'
-  class OptionsParcerLogic
+  class OptionsParserLogic
 
-    def initialize(argv)
-      @argv = argv
+    def initialize(args)
+      @args = args
     end
 
     def parse
