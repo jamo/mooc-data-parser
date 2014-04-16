@@ -34,7 +34,6 @@ module MoocDataParser
       @options, @opt = MoocDataParser::OptionsParserLogic.new(args).parse
     end
 
-
     def maybe_fetch_json()
       if @options.reload or @notes['user_info'].nil? or @notes['week_data'].nil?
         download_data()
@@ -51,11 +50,10 @@ module MoocDataParser
       participants = json[:participants]
       week_data = json[:week_data]
       my_user = participants.find{|a| a[user_field] == user }
-      if my_user.nil?
-        abort "User not found"
-      end
-      show_user_print_basic_info()
 
+      abort "User not found" if my_user.nil?
+
+      show_user_print_basic_info()
       show_user_print_completion_percentage(my_user, week_data)  if @options.show_completion_percentige
       show_user_print_missing_points(my_user, week_data) if @options.show_missing_compulsory_points
     end
@@ -205,7 +203,7 @@ module MoocDataParser
         points_by_week[week] = week_data[week][participant['username']]
       end
 
-      missing_by_week = points_by_week.keys.each_with_object({})  do |week, missing_by_week|
+      points_by_week.keys.each_with_object({})  do |week, missing_by_week|
         weeks_points = points_by_week[week] || [] #palauttaa arrayn
         weeks_compulsory_points = compulsory_exercises[week] || []
         missing_by_week[week] = weeks_compulsory_points - weeks_points
@@ -217,5 +215,6 @@ module MoocDataParser
         participant['hakee_yliopistoon_2014']
       end
     end
+
   end
 end

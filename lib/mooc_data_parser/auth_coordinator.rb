@@ -1,6 +1,7 @@
 module MoocDataParser
   require 'io/console'
   class AuthCoordinator
+
     def auth
       print 'username: '
       username = $stdin.gets.strip
@@ -9,5 +10,6 @@ module MoocDataParser
       puts
       {username: username, password: password}
     end
+
   end
 end
