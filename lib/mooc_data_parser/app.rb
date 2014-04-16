@@ -77,31 +77,36 @@ module MoocDataParser
       {username: username, password: password}
     end
 
+    def get_process_thread
+      t = -> do
+        loop do
+          print '.'
+          sleep 0.5
+        end
+        puts
+      end
+      Thread.new(&t)
+    end
+
     def maybe_fetch_json()
       if @options.reload or @notes['user_info'].nil? or @notes['week_data'].nil?
-
-        t = -> do
-          loop do
-            print '.'
-            sleep 0.5
-          end
-          puts
-        end
-
-        auth = get_auth()
-        th = Thread.new(&t)
-
-        url = "http://tmc.mooc.fi/mooc/participants.json?api_version=7&utf8=%E2%9C%93&filter_koko_nimi=&column_username=1&column_email=1&column_koko_nimi=1&column_hakee_yliopistoon_2014=1&group_completion_course_id=18"
-        user_info = JSON.parse(HTTParty.get(url, basic_auth: auth).body)['participants']
-        week_data = fetch_week_datas(auth)
-        @notes['user_info'] = user_info.clone
-        @notes['week_data'] = week_data.clone
-        th.kill
-        puts
-        {participants: user_info, week_data: week_data}
+        download_data()
       else
         {participants: @notes['user_info'].clone, week_data: @notes['week_data'].clone}
       end
+    end
+
+    def download_data
+      auth = get_auth()
+      thread = get_process_thread()
+      url = "http://tmc.mooc.fi/mooc/participants.json?api_version=7&utf8=%E2%9C%93&filter_koko_nimi=&column_username=1&column_email=1&column_koko_nimi=1&column_hakee_yliopistoon_2014=1&group_completion_course_id=18"
+      user_info = JSON.parse(HTTParty.get(url, basic_auth: auth).body)['participants']
+      week_data = fetch_week_datas(auth)
+      @notes['user_info'] = user_info.clone
+      @notes['week_data'] = week_data.clone
+      thread.kill
+      puts
+      {participants: user_info, week_data: week_data}
     end
 
     def show_info_about(user, user_field = 'username', json)
@@ -163,17 +168,35 @@ module MoocDataParser
       week_data
     end
 
-    def list_and_filter_participants(json)
-      wanted_fields = %W(username email koko_nimi)
+    def wanted_fields
+      %w(username email koko_nimi)
+    end
 
+    def list_and_filter_participants(json)
       participants = json[:participants]
       week_data = json[:week_data]
       everyone_in_course = participants.size
       only_applying!(participants)
       hakee_yliopistoon = participants.size
 
+      print_headers()
+      process_participants(participants, week_data)
+      print_list_stats(everyone_in_course, hakee_yliopistoon)
+    end
+
+    def print_headers
       puts "%-20s %-35s %-25s %-120s" % ["Username", "Email", "Real name", "Missing points"]
       puts '-'*200
+    end
+
+    def print_list_stats(everyone_in_course, hakee_yliopistoon)
+      puts "\n"
+      puts "Stats: "
+      puts "%25s: %4d" % ["Kaikenkaikkiaan kurssilla", everyone_in_course]
+      puts "%25s: %4d" % ["Hakee yliopistoon", hakee_yliopistoon]
+    end
+
+    def process_participants(participants, week_data)
       participants.each do |participant|
         nice_string_in_array = wanted_fields.map do |key|
           participant[key]
@@ -191,13 +214,6 @@ module MoocDataParser
 
         puts to_be_printed % nice_string_in_array
       end
-
-      puts
-      puts
-      puts "Stats: "
-      puts "%25s: %4d" % ["Kaikenkaikkiaan kurssilla", everyone_in_course]
-      puts "%25s: %4d" % ["Hakee yliopistoon", hakee_yliopistoon]
-
     end
 
     def format_done_exercises_percents(hash)
