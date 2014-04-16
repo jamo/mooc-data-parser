@@ -271,18 +271,17 @@ module MoocDataParser
       {'6' => %w(102.1 102.2 102.3 103.1 103.2 103.3), '7' => %w(116.1 116.2 116.3), '8' => %w(124.1 124.2 124.3 124.4),
        '9' => %w(134.1 134.2 134.3 134.4 134.5), '10' => %w(141.1 141.2 141.3 141.4), '11' => %w(151.1 151.2 151.3 151.4), '12' => %w()}
     end
+
     def get_points_info_for_user(participant, week_data)
       points_by_week = week_data.keys.each_with_object({}) do |week, points_by_week|
         points_by_week[week] = week_data[week][participant['username']]
       end
 
-      missing_by_week = {}
-      points_by_week.keys.each  do |week|
+      missing_by_week = points_by_week.keys.each_with_object({})  do |week, missing_by_week|
         weeks_points = points_by_week[week] || [] #palauttaa arrayn
         weeks_compulsory_points = compulsory_exercises[week] || []
         missing_by_week[week] = weeks_compulsory_points - weeks_points
       end
-      missing_by_week
     end
 
     def only_applying!(participants)
