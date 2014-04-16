@@ -13,7 +13,7 @@ module MoocDataParser
       $cache.write_file_to_cache('data.json', @notes.to_json)
     end
 
-    def decide_what_to_do
+    def decide_what_to_do(json)
       if @options.user
         show_info_about(@options.user, 'username', json)
       elsif @options.user_email
@@ -24,7 +24,7 @@ module MoocDataParser
         list_and_filter_participants(json)
       else
         $cache.write_file_to_cache('data.json', @notes.to_json)
-        puts opt
+        puts @opt
         abort
       end
     end
@@ -34,9 +34,9 @@ module MoocDataParser
       @notes = begin JSON.parse($cache.read_file_from_cache('data.json')) rescue  {} end
     end
 
-    def parse_options
+    def parse_options(args)
       @options = OpenStruct.new
-      opt = OptionParser.new do |opts|
+      @opt = OptionParser.new do |opts|
         opts.banner = "Usage: show-mooc-details.rb [options]"
 
         opts.on("-f", "--force", "Reload data from server") do |v|
@@ -65,7 +65,7 @@ module MoocDataParser
           exit
         end
       end
-      opt.parse!(args)
+      @opt.parse!(args)
     end
 
     def get_auth
@@ -111,30 +111,36 @@ module MoocDataParser
       if my_user.nil?
         abort "User not found"
       end
+      show_user_print_basic_info()
+
+      show_user_print_completion_percentage(my_user, week_data)  if @options.show_completion_percentige
+      show_user_print_missing_points(my_user, week_data) if @options.show_missing_compulsory_points
+    end
+
+    def show_user_print_basic_info
       formatted_print_user_details ["Username", my_user['username']]
       formatted_print_user_details ["Email", my_user['email']]
       formatted_print_user_details ["Hakee yliopistoon", my_user['hakee_yliopistoon_2014']]
       formatted_print_user_details ["Koko nimi", my_user['koko_nimi']]
+    end
 
-      if @options.show_completion_percentige
-        formatted_print_user_details ["Points per week"]
-        done_exercise_percents(my_user, participants).each do |k|
-          begin
-            k = k.first
-            formatted_print_user_details [k[0], k[1]]
-          rescue
-            nil
-          end
+    def show_user_print_missing_points(my_user, week_data)
+      formatted_print_user_details ["Compulsory points"]
+      get_points_info_for_user(my_user, week_data).each do |k,v|
+        formatted_print_user_details [k, v.join(", ")]
+      end
+    end
+
+    def show_user_print_completion_percentage(my_user, week_data)
+      formatted_print_user_details ["Points per week"]
+      done_exercise_percents(my_user, participants).each do |k|
+        begin
+          k = k.first
+          formatted_print_user_details [k[0], k[1]]
+        rescue
+          nil
         end
       end
-
-      if @options.show_missing_compulsory_points
-        formatted_print_user_details ["Compulsory points"]
-        get_points_info_for_user(my_user, week_data).each do |k,v|
-          formatted_print_user_details [k, v.join(", ")]
-        end
-      end
-
     end
 
     def formatted_print_user_details(details)
@@ -179,7 +185,6 @@ module MoocDataParser
           nice_string_in_array << missing_points_to_list_string(get_points_info_for_user(participant, week_data))
         end
 
-
         to_be_printed = "%-20s %-35s %-25s "
         to_be_printed << "%-180s " if @options.show_completion_percentige
         to_be_printed << "%-120s" if @options.show_missing_compulsory_points
@@ -195,7 +200,6 @@ module MoocDataParser
 
     end
 
-
     def format_done_exercises_percents(hash)
       hash.map do |k|
         begin
@@ -206,7 +210,6 @@ module MoocDataParser
         end
       end.compact.join(", ")
     end
-
 
     def done_exercise_percents(participant, participants_data)
       user_info = participants_data.find{ |p| p['username'] == participant['username'] }
@@ -234,7 +237,6 @@ module MoocDataParser
       end
 
       str
-
     end
 
     def get_points_info_for_user(participant, week_data)
@@ -246,14 +248,12 @@ module MoocDataParser
         points_by_week[week] = week_data[week][participant['username']]
       end
 
-
       missing_by_week = {}
       points_by_week.keys.each  do |week|
         weeks_points = points_by_week[week] || [] #palauttaa arrayn
         weeks_compulsory_points = compulsory_exercises[week] || []
         missing_by_week[week] = weeks_compulsory_points - weeks_points
       end
-
       missing_by_week
     end
 
